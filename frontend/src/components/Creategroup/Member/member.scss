@@ -1,0 +1,35 @@
+.member-item {
+     position: relative;
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+    .ctl {
+         margin: 0 3px;
+    }
+    .delete {
+        margin-left: 10px;
+        font-size: 20px;
+        font-weight: bold;
+        color: #c00; 
+    }
+    .member-avatar {
+         width: 35px;
+         &.faded {
+              opacity: .4;
+         }
+    }
+    .user-item {
+          cursor: pointer;
+          &:hover {
+               background: #cccccc;
+          }
+    }
+}
+.dropdown-menu {
+     top:91%;
+     left : 11%;
+     width : 81%;
+     &.open {
+          display: block;
+    }
+} 

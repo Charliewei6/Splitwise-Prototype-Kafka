@@ -1,0 +1,46 @@
+.user-head {
+    float: left;
+    width : 200px;
+    margin-right: 20px;
+    .user-img {
+         max-width: 100%;
+         vertical-align: middle;
+    }
+}
+.user-info {
+     float:left;
+     .title {
+        margin-bottom: 5px;
+        font-size: 13px;
+        font-weight: normal;
+        line-height: 18px;
+        color: #333333;
+     }
+     .content {
+          margin-bottom: 15px;
+          .txt {
+               font-size: 14px;
+               font-weight: bold;
+          }
+          .edit {
+               margin-left: 10px;
+               cursor: pointer;
+          }
+     }
+}
+.config-box {
+    float:right;
+    .title {
+        margin-bottom: 5px;
+        font-size: 13px;
+        font-weight: normal;
+        line-height: 18px;
+        color: #333333;
+     }
+     .form-sel {
+        width: 220px;
+        border: 1px solid #bbb;
+        line-height: 28px;
+        margin-bottom: 10px;
+     }
+}

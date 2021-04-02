@@ -1,0 +1,45 @@
+.create-group {
+    position: relative;
+    line-height: 36px;
+    width: auto;
+    max-width: 600px;
+    padding: 0 10px;
+    margin: 50px auto;
+    font-size: 18px;
+    .leftbox{
+        float: left;
+        width: 200px;
+        margin-right: 25px;
+        .upload-group-avatar {
+            display : inline-block;
+            width: 100%;
+            height: 28px;
+            margin-top: 20px;
+            line-height: 100%;
+            font-size: 13px;
+       }
+    }
+    .logo{
+        display: inline-block;
+        width: 100%;
+        height: 200px;
+        
+    }
+    .content {
+        overflow: hidden;
+        h2 {
+            text-transform: uppercase;
+            font-size: 16px;
+            color: #999;
+            font-weight: bold;
+            line-height: 20px;
+        }
+        .add {
+            display: block;
+            margin: 15px 0 10px;
+            font-size: 13px;
+            line-height: 13px;
+            color: #0088cc;
+        }
+   }
+}
