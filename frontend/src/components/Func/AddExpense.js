@@ -41,7 +41,7 @@ class Group extends Component{
          let data = {
               user_id : id,
               user_name : Name,
-              group_id : groupChosed.id,
+              group_id : groupChosed.group_id._id,
               group_name : groupChosed.name,
               name : expenseName,
               money : Number(money)
@@ -100,11 +100,11 @@ class Group extends Component{
                         <div style={{ maxHeight:'350px',overflow:'auto'}}>
                                 {
                                     groupList.map(item => {
-                                        return <div className={`flex f-center mt20 group-item ${groupChosed.id === item.id? 'checked': ''}`} onClick={() => {
+                                        return <div className={`flex f-center mt20 group-item ${groupChosed.group_id._id === item.group_id._id? 'checked': ''}`} onClick={() => {
                                              this.setState({
                                                   groupChosed : item
                                              })
-                                        }}  key={item.id}><img className='default_avatar mr20' alt=" " src={item.picture} ></img><span>{item.name}</span></div>
+                                        }}  key={item.group_id._id}><img className='default_avatar mr20' alt=" " src={item.group_id.picture} ></img><span>{item.group_id.name}</span></div>
                                     })
                                 }
                         </div> 
