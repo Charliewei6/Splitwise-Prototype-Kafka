@@ -547,15 +547,10 @@ app.get('/activity', function (req, res) {
     var userId = req.query.user_id;
     var groupId = req.query.group_id;
     var order = req.query.order;
-    if (order == 0) {
-        order=-1
-     }
-    if(order===1)
-     console.log("enter:",order)
+
     if (groupId) {
-        // whereSql = `(ei.owe_id = ${userId} OR ei.owed_id = ${userId}) AND ei.group_id = ${groupId}`
         ExpenseItem.find({ $or: [{ owe_id: userId }, { owed_id: userId }],group_id:groupId}).
-        populate({path: 'expense_id',options: { sort: { create_at : order} }} ).
+        populate('expense_id owe_id').
         exec(function (err, result) {
             if (err) {
                 console.log(err)
@@ -563,15 +558,16 @@ app.get('/activity', function (req, res) {
                     message: 'error'
                 });
             } else {
-                // console.log(result)
 
+                if(order==0)
+                    result = result.reverse()
                 res.status(200).json(result);
             }
         });
 
     }else{
         ExpenseItem.find({ $or: [{ owe_id: userId }, { owed_id: userId }]}).
-        populate({path: 'expense_id',options: { sort: { create_at : order} }} ).
+        populate('expense_id owe_id').
         exec(function (err, result) {
             if (err) {
                 console.log(err)
@@ -580,21 +576,250 @@ app.get('/activity', function (req, res) {
                 });
             } else {
                 // console.log(result)
-
+                if(order==0)
+                    result = result.reverse()
                 res.status(200).json(result);
             }
         });
     }
-   
-
-    // var sql = `SELECT distinct e.creator_name,e.name,e.group_name,e.create_at,e.money,ei.owed_id,ei.money AS item_money  FROM expense_item AS ei 
-    // LEFT JOIN expenses AS e ON ei.expense_id = e.id WHERE ${whereSql} ORDER BY ${orderSql}`;
-    
-    
-
-
 
 });
+
+app.get('/dashboard',function(req,res){
+    var userId = req.query.user_id;
+     Promise.all([
+        ExpenseItem.find({owe_id:userId,status:0}).sort({ _id: 'desc' }).
+        populate('expense_id owed_id'),
+        ExpenseItem.find({owed_id:userId,status:0}).sort({ _id: 'desc' }).
+        populate('expense_id owe_id')
+    ]).then(result=>{
+        const [res1,res2] = result;
+        // console.log("res1:",res1);
+        // console.log("res2:",res2);
+
+        var owe_sum=0
+        for(var i=0;i<res1.length;i++)
+            owe_sum +=res1[i].money        
+
+        var owed_sum=0
+        for(var i=0;i<res2.length;i++)
+            owed_sum +=res2[i].money
+        
+        var total = owed_sum - owe_sum
+        
+        res.status(200).json({
+            owe: res1,
+            owed: res2,
+            total_owe: owe_sum,
+            total_owed: owed_sum,
+            total_balance: total
+        });
+    
+    }).catch(err=>{
+        if (err) {
+            console.log("error: ", err);
+            res.status(401).json({
+                message: 'error'
+            });
+        } 
+    })
+  
+
+});
+
+// app.post('/settle_up',function(req,res){
+//     var userId = req.body.user_id;
+//     console.log("enter settle")
+//     Promise.all([
+//         ExpenseItem.find({owe_id:userId,status:0}),
+//         ExpenseItem.find({owed_id:userId,status:0})
+
+//    ]).then(result=>{
+//     const [res1,res2] = result;
+//     console.log("res1:",res1);
+//     console.log("res2:",res2);
+//     for (var i=0; i<res1.length; i++) {
+//         var m =  res1[i].money
+//         GroupPerson.findOne({person_id: res1[i].owed_id,group_id:res1[i].group_id}, (err, result) => {
+//             var v1 = result.balance-m
+//             console.log("owe -",v1)
+//             GroupPerson.findOneAndUpdate( {person_id: result.person_id,group_id:result.group_id},{$set: {balance:v1}},(err, result) => {
+//                 if (err) {
+//                     console.log(err)
+//                     res.status(401).json({
+//                         message: 'error'
+//                     });
+//                 }
+           
+//             });
+
+//         });
+
+//         GroupPerson.findOne({person_id: userId,group_id:res1[i].group_id}, (err, result) => { 
+//             var v2 = result.balance+m
+//             console.log("owe +",v2)
+//             GroupPerson.findOneAndUpdate( {person_id: userId,group_id:result.group_id},{$set: {balance:v2}},(err, result) => {
+//                 if (err) {
+//                     console.log(err)
+//                     res.status(401).json({
+//                         message: 'error'
+//                     });
+//                 }
+//             });
+//         });
+
+//     }
+    
+//     for (var i=0; i<res2.length; i++) {
+
+//         var m2 =  res2[i].money
+//         GroupPerson.findOne({person_id: res2[i].owe_id,group_id:res2[i].group_id}, (err, res) => { 
+//             var v3 = res.balance+m2
+//             console.log("owed +",v3)
+
+//             GroupPerson.findOneAndUpdate( {person_id: res.person_id,group_id:res.group_id},{$set: {balance:v3}} ,(err, result) => {
+//                 if (err) {
+//                     console.log(err)
+//                     res.status(401).json({
+//                         message: 'error'
+//                     });
+//                 }
+//             });
+//         });
+//         GroupPerson.findOne({person_id: userId,group_id:res2[i].group_id}, (err, res) => {
+//             var v4 = res.balance-m2
+//             console.log("owed-",v4)
+
+//             GroupPerson.findOneAndUpdate( {person_id: userId,group_id:res.group_id},{$set: {balance:v4}} ,(err, result) => {
+//                 if (err) {
+//                     console.log(err)
+//                     res.status(401).json({
+//                         message: 'error'
+//                     });
+//                 }
+               
+//             });
+//         });
+//     }
+//     // updSql += `UPDATE expense_item SET status = 1 WHERE owe_id = ${userId};
+//     //            UPDATE expense_item SET status = 1 WHERE owed_id = ${userId};`;
+//     ExpenseItem.updateMany({owe_id:userId,status:0},{$set: {status:1}},(err, result) => {
+
+//         if (err) {
+//             console.log(err)
+//             res.status(401).json({
+//                 message: 'error'
+//             });
+
+//         }
+//         else{
+//             console.log("answer:", result)
+//         }
+       
+//     });
+
+//     ExpenseItem.updateMany({owed_id:userId,status:0},{$set: {status:1}},(err, result) => {
+//         if (err) {
+//             console.log(err)
+//             res.status(401).json({
+//                 message: 'error'
+//             });
+//         }
+       
+//     });
+//     res.status(200).json({
+//         message: 'success'
+//     });
+//    }).catch(err=>{
+//     if (err) {
+//         console.log("error: ", err);
+//         res.status(401).json({
+//             message: 'error'
+//         });
+//     } 
+// })
+    
+// });
+
+
+app.post('/settle_up',async function(req,res){
+    var userId = req.body.user_id;
+    let foo = async () => {
+    ExpenseItem.find({owe_id:userId,status:0}, async(err, res1) => {  
+        console.log("res1:",res1) 
+        if (err) {
+            res.status(401).json({
+                message: 'error'
+            });
+        } else{
+            for (var i=0; i<res1.length; i++) {
+                let m =  res1[i].money
+                console.log("1")
+                var result1 = await GroupPerson.findOne({person_id: res1[i].owed_id,group_id:res1[i].group_id})
+                console.log("2")
+                var result11 = await GroupPerson.findByIdAndUpdate( {_id:result1._id},{$set: {balance:result1.balance-m}})
+                console.log("3")
+                var result2 = await GroupPerson.findOne({person_id: userId,group_id:result1.group_id})
+                console.log("4")
+                var result22 = await GroupPerson.findByIdAndUpdate( {_id:result2._id},{$set: {balance:result2.balance+m}})                                  
+            }
+            ExpenseItem.updateMany({owe_id:userId,status:0},{$set: {status:1}} , (err, res) => {
+                console.log("5")
+                if (err) {
+                    console.log(err)
+                    res.status(401).json({
+                        message: 'error'
+                    });
+                } 
+                else{ 
+                    ExpenseItem.find({owed_id:userId,status:0}, async(err, res2) => { 
+                        console.log("res2:",res2)
+                        if (err) {
+                            console.log(err)
+                            res.status(401).json({
+                                message: 'error'
+                            });
+                        } 
+                        else{ 
+                            for (var i=0; i<res2.length; i++) {
+                                let m2 =  res2[i].money
+                                console.log("6")
+                                result3 = await GroupPerson.findOne({person_id: res2[i].owe_id,group_id:res2[i].group_id})
+                                console.log("7")
+                                result33 = await GroupPerson.findByIdAndUpdate( {_id:result3._id},{$set: {balance:result3.balance+m2}})
+                                console.log("8")
+                                result4 = await GroupPerson.findOne({person_id: userId,group_id:result3.group_id})
+                                console.log("9")
+                                result44 = await GroupPerson.findByIdAndUpdate( {_id:result4._id},{$set: {balance:result4.balance-m2}})
+                            } 
+                            ExpenseItem.updateMany({owed_id:userId,status:0},{$set: {status:1}},(err, result) => {   
+                                console.log("10")         
+                            });
+                        }
+                        
+                
+                    });
+                }   
+            });
+
+                }
+            })
+
+        }
+    setTimeout( async function(){ 
+        let a = await foo()
+        res.status(200).json({
+            message: 'success'
+        
+        });
+    }, 300);   
+    
+
+      
+       
+    
+});
+
 //start your server on port 3001
 app.listen(3001);
 module.exports = app;
