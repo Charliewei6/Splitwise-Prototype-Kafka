@@ -627,124 +627,8 @@ app.get('/dashboard',function(req,res){
 
 });
 
-// app.post('/settle_up',function(req,res){
-//     var userId = req.body.user_id;
-//     console.log("enter settle")
-//     Promise.all([
-//         ExpenseItem.find({owe_id:userId,status:0}),
-//         ExpenseItem.find({owed_id:userId,status:0})
-
-//    ]).then(result=>{
-//     const [res1,res2] = result;
-//     console.log("res1:",res1);
-//     console.log("res2:",res2);
-//     for (var i=0; i<res1.length; i++) {
-//         var m =  res1[i].money
-//         GroupPerson.findOne({person_id: res1[i].owed_id,group_id:res1[i].group_id}, (err, result) => {
-//             var v1 = result.balance-m
-//             console.log("owe -",v1)
-//             GroupPerson.findOneAndUpdate( {person_id: result.person_id,group_id:result.group_id},{$set: {balance:v1}},(err, result) => {
-//                 if (err) {
-//                     console.log(err)
-//                     res.status(401).json({
-//                         message: 'error'
-//                     });
-//                 }
-           
-//             });
-
-//         });
-
-//         GroupPerson.findOne({person_id: userId,group_id:res1[i].group_id}, (err, result) => { 
-//             var v2 = result.balance+m
-//             console.log("owe +",v2)
-//             GroupPerson.findOneAndUpdate( {person_id: userId,group_id:result.group_id},{$set: {balance:v2}},(err, result) => {
-//                 if (err) {
-//                     console.log(err)
-//                     res.status(401).json({
-//                         message: 'error'
-//                     });
-//                 }
-//             });
-//         });
-
-//     }
-    
-//     for (var i=0; i<res2.length; i++) {
-
-//         var m2 =  res2[i].money
-//         GroupPerson.findOne({person_id: res2[i].owe_id,group_id:res2[i].group_id}, (err, res) => { 
-//             var v3 = res.balance+m2
-//             console.log("owed +",v3)
-
-//             GroupPerson.findOneAndUpdate( {person_id: res.person_id,group_id:res.group_id},{$set: {balance:v3}} ,(err, result) => {
-//                 if (err) {
-//                     console.log(err)
-//                     res.status(401).json({
-//                         message: 'error'
-//                     });
-//                 }
-//             });
-//         });
-//         GroupPerson.findOne({person_id: userId,group_id:res2[i].group_id}, (err, res) => {
-//             var v4 = res.balance-m2
-//             console.log("owed-",v4)
-
-//             GroupPerson.findOneAndUpdate( {person_id: userId,group_id:res.group_id},{$set: {balance:v4}} ,(err, result) => {
-//                 if (err) {
-//                     console.log(err)
-//                     res.status(401).json({
-//                         message: 'error'
-//                     });
-//                 }
-               
-//             });
-//         });
-//     }
-//     // updSql += `UPDATE expense_item SET status = 1 WHERE owe_id = ${userId};
-//     //            UPDATE expense_item SET status = 1 WHERE owed_id = ${userId};`;
-//     ExpenseItem.updateMany({owe_id:userId,status:0},{$set: {status:1}},(err, result) => {
-
-//         if (err) {
-//             console.log(err)
-//             res.status(401).json({
-//                 message: 'error'
-//             });
-
-//         }
-//         else{
-//             console.log("answer:", result)
-//         }
-       
-//     });
-
-//     ExpenseItem.updateMany({owed_id:userId,status:0},{$set: {status:1}},(err, result) => {
-//         if (err) {
-//             console.log(err)
-//             res.status(401).json({
-//                 message: 'error'
-//             });
-//         }
-       
-//     });
-//     res.status(200).json({
-//         message: 'success'
-//     });
-//    }).catch(err=>{
-//     if (err) {
-//         console.log("error: ", err);
-//         res.status(401).json({
-//             message: 'error'
-//         });
-//     } 
-// })
-    
-// });
-
-
 app.post('/settle_up',async function(req,res){
     var userId = req.body.user_id;
-    let foo = async () => {
     ExpenseItem.find({owe_id:userId,status:0}, async(err, res1) => {  
         console.log("res1:",res1) 
         if (err) {
@@ -754,20 +638,15 @@ app.post('/settle_up',async function(req,res){
         } else{
             for (var i=0; i<res1.length; i++) {
                 let m =  res1[i].money
-                console.log("1")
                 var result1 = await GroupPerson.findOne({person_id: res1[i].owed_id,group_id:res1[i].group_id})
-                console.log("2")
                 var result11 = await GroupPerson.findByIdAndUpdate( {_id:result1._id},{$set: {balance:result1.balance-m}})
-                console.log("3")
                 var result2 = await GroupPerson.findOne({person_id: userId,group_id:result1.group_id})
-                console.log("4")
                 var result22 = await GroupPerson.findByIdAndUpdate( {_id:result2._id},{$set: {balance:result2.balance+m}})                                  
             }
-            ExpenseItem.updateMany({owe_id:userId,status:0},{$set: {status:1}} , (err, res) => {
-                console.log("5")
+            ExpenseItem.updateMany({owe_id:userId,status:0},{$set: {status:1}} , (err, result1) => {
                 if (err) {
                     console.log(err)
-                    res.status(401).json({
+                    result1.status(401).json({
                         message: 'error'
                     });
                 } 
@@ -783,41 +662,24 @@ app.post('/settle_up',async function(req,res){
                         else{ 
                             for (var i=0; i<res2.length; i++) {
                                 let m2 =  res2[i].money
-                                console.log("6")
                                 result3 = await GroupPerson.findOne({person_id: res2[i].owe_id,group_id:res2[i].group_id})
-                                console.log("7")
                                 result33 = await GroupPerson.findByIdAndUpdate( {_id:result3._id},{$set: {balance:result3.balance+m2}})
-                                console.log("8")
                                 result4 = await GroupPerson.findOne({person_id: userId,group_id:result3.group_id})
-                                console.log("9")
                                 result44 = await GroupPerson.findByIdAndUpdate( {_id:result4._id},{$set: {balance:result4.balance-m2}})
                             } 
-                            ExpenseItem.updateMany({owed_id:userId,status:0},{$set: {status:1}},(err, result) => {   
-                                console.log("10")         
+                            ExpenseItem.updateMany({owed_id:userId,status:0},{$set: {status:1}},(err, result2) => {   
+                                res.status(200).json({
+                                    message: 'success'
+                                });        
                             });
                         }
-                        
                 
                     });
                 }   
-            });
+                });
 
                 }
             })
-
-        }
-    setTimeout( async function(){ 
-        let a = await foo()
-        res.status(200).json({
-            message: 'success'
-        
-        });
-    }, 300);   
-    
-
-      
-       
-    
 });
 
 //start your server on port 3001
