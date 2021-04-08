@@ -33,16 +33,17 @@ class Group extends Component{
          // 创建账单
          // ...
          let { groupChosed,expenseName,money } = this.state
-         let { id,Name} = this.props.userInfo
-         if(!groupChosed.id) {
+         let { _id,Name} = this.props.userInfo
+        
+         if(!groupChosed._id) {
               alert('Please choose a group')
               return;
          }
          let data = {
-              user_id : id,
+              user_id : _id,
               user_name : Name,
               group_id : groupChosed.group_id._id,
-              group_name : groupChosed.name,
+              group_name : groupChosed.group_id.name,
               name : expenseName,
               money : Number(money)
          }
@@ -90,7 +91,7 @@ class Group extends Component{
         let { userInfo } = this.props
         return(
             <span>
-                <a className='btn btn-danger' onClick={this.open} href='javascript:void(0)'>Add an expense</a>
+                <a className='btn btn-danger' onClick={this.open}>Add an expense</a>
                 <Modal show={showModal} onHide={this.close}>
                     <Modal.Header closeButton>
                         <Modal.Title>Add an expense</Modal.Title>
@@ -100,7 +101,7 @@ class Group extends Component{
                         <div style={{ maxHeight:'350px',overflow:'auto'}}>
                                 {
                                     groupList.map(item => {
-                                        return <div className={`flex f-center mt20 group-item ${groupChosed.group_id._id === item.group_id._id? 'checked': ''}`} onClick={() => {
+                                        return <div className={`flex f-center mt20 group-item ${groupChosed._id === item._id? 'checked': ''}`} onClick={() => {
                                              this.setState({
                                                   groupChosed : item
                                              })
@@ -112,31 +113,15 @@ class Group extends Component{
                         <FormControl
                             type="text"
                             value={this.state.expenseName}
-                            placeholder="Enter a expenseName"
+                            placeholder="Enter a Expense Description"
                             onChange={this.handleExPenseName}
                         />
                         <div className='mt20 flex'><span style={{ marginRight:'20px' }}>{ userInfo.currencyStr}</span><input className='inp-money flex1' type="number" placeholder='Enter a money' onChange={this.handerMoney} /></div>  
-                        {/* <div className='mt20'>
-                            <FormLabel>chose image</FormLabel>
-                            <UploadPic uploadSuccess={(url) => {
-                                this.setState({
-                                    expensePicUrl : url
-                                })
-                            }}></UploadPic>
-                        </div>
-                        <div className='mt20'>
-                            <FormLabel>add note</FormLabel>
-                            <FormControl
-                                type="text"
-                                value={this.state.note}
-                                placeholder="add note"
-                                onChange={this.handleNote}
-                            />
-                        </div> */}
+            
                     </Modal.Body>
                     <Modal.Footer>
-                        <a className='btn btn-link' href='javascript:void(0)' onClick={this.close}>cancel</a>
-                        <a className='btn btn-success' href='javascript:void(0)' onClick={this.saveExpense} >save</a>
+                        <a className='btn btn-link'  onClick={this.close}>cancel</a>
+                        <a className='btn btn-success'  onClick={this.saveExpense} >save</a>
                 </Modal.Footer>
                 </Modal>
             </span>

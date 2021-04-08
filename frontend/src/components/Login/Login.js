@@ -1,9 +1,8 @@
 import React, {Component} from 'react';
 import '../../App.css';
 import cookie from 'react-cookies';
-import {Redirect} from 'react-router';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import {Button,Form,Col,Card} from 'react-bootstrap';
+import {Form,Col,Card} from 'react-bootstrap';
 import { login,getProfile } from '../../api/request';
 import { connect } from 'react-redux';
 import { SET_USER } from '../../store/actionTypes';
@@ -48,7 +47,7 @@ class Login extends Component{
             getProfile(response.id).then(data => {
                 data.Timezone = data.Timezone || 'Africa/Abidjan'
                 data.Currency = data.Currency || 0
-                localStorage.setItem('userInfo',JSON.stringify(data))
+                localStorage.setItem('userInfo',JSON.stringify(data))                
                 this.props.setUser(data)
                 this.props.history.push('/dashboard')
             })
@@ -58,14 +57,8 @@ class Login extends Component{
     }
 
     render(){
-        //redirect based on successful login
-        // let redirectVar = null;
-        // if(cookie.load('cookie')){
-        //     redirectVar = <Redirect to= "/dashboard"/>
-        // }
         return(
             <div align="center">
-                {/* {redirectVar} */}
                 <Card className="text-white">
                 <Card.Img src="https://i.picsum.photos/id/3/5616/3744.jpg?hmac=QSuBxtSpEv3Qm3iStn2b_Ikzj2EVD0jzn99m1n6JD9I" alt="Card image" />
                 <Card.ImgOverlay>

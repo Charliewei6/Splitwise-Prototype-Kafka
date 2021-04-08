@@ -26,11 +26,12 @@ class GroupFilter extends Component {
     }
      render() {
         let { curGroupId,groupList } = this.state;
+        
         return <select className='recent-select' value={curGroupId} onChange={this.changeGroup.bind(this)}>
                 <option value='' >allGroup</option>
                 {
                     groupList.map(item => {
-                        return <option key={item.id} value={item.id}>{item.name}</option>
+                        return <option key={item.group_id._id} value={item.group_id._id}>{item.group_id.name}</option>
                     })
                 }
         </select>

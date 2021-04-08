@@ -116,10 +116,11 @@ class Profile extends Component{
         if(!cookie.load('cookie')){
             this.props.history.push('/')
            }
-        let { id } = this.props.userInfo
-        if(!id) return;
-        getProfile(this.props.userInfo.id).then(data => {
-            this.props.setUser(data[0])
+
+        let { _id } = this.props.userInfo
+        if(!_id) return;
+        getProfile(this.props.userInfo._id).then(data => {
+            this.props.setUser(data)
             let { Name,Email,Phone,Currency,Language,Timezone,Picture } = this.props.userInfo
             this.setState({
                 name : Name || '',
@@ -239,16 +240,16 @@ class Profile extends Component{
     saveProfile() {
          let { name,email,phoneNumber,currency,language,timeZone,avatarUrl } = this.state
          changeUserInfo({
-            userId:this.props.userInfo.id,name,email,phoneNumber,currency,language,timeZone,avatarUrl
+            userId:this.props.userInfo._id,name,email,phoneNumber,currency,language,timeZone,avatarUrl
          }).then(() => {
               this.setState( {
                 editingName : false,
                 editingEmail : false,
                 editingPhone : false
               })
-              getProfile(this.props.userInfo.id).then(data => {
-                  localStorage.setItem('userInfo',JSON.stringify(data[0]))
-                  this.props.setUser(data[0])
+              getProfile(this.props.userInfo._id).then(data => {
+                  localStorage.setItem('userInfo',JSON.stringify(data))
+                  this.props.setUser(data)
                   let { Name,Email,Phone,Currency,Language,Timezone,Picture } = this.props.userInfo
                   this.setState({
                         name : Name || '',

@@ -33,7 +33,7 @@ class Creategroup extends Component{
                     }
               ],
               groupPicUrl : '',
-              detailId : this.props.match.params.id,
+              detailId : this.props.match.params._id,
               detailContent : {}
          }
          this.getValidationState = this.getValidationState.bind(this)
@@ -42,15 +42,18 @@ class Creategroup extends Component{
     componentDidMount() {
         let { detailId } = this.state
          if(detailId) {
+
               getGroupDetail(detailId).then(data => {
                 //    this.members = data.members
                     data.members && data.members.map(item => {
-                         item.key=item.id
+                         item.key=item._id
                          item.name = item.Name 
                          item.isDetail = true
                          return item   
                     }) 
-                    let group = data.group && data.group[0]
+                    
+                    // let group = data.group && data.group[0]
+                    let group = data.group
                    this.setState({
                         members : data.members,
                         groupName :  group.name,
@@ -87,11 +90,10 @@ class Creategroup extends Component{
     attrChange(item,index) {
          this.state.members[index]['name'] = item.Name
          this.state.members[index]['email'] = item.Email
-         this.state.members[index]['id'] = item.id
+         this.state.members[index]['id'] = item._id
          this.setState({
               members : this.state.members
          })
-         console.log(this.state.members)
     }
     memberChange(index) {
          this.state.members.splice(index,1)
@@ -101,9 +103,8 @@ class Creategroup extends Component{
     }
     saveToGroup() {
         let { groupPicUrl,groupName,members,detailId } = this.state
-        console.log(members)
         let data = {
-            user_id : this.props.userInfo.id,
+            user_id : this.props.userInfo._id,
             user_name : this.props.userInfo.Name,
             name : groupName,
             picture : groupPicUrl,

@@ -28,6 +28,7 @@ class Mygroup extends Component{
              this.setState({
                  inviteList : res
              })
+             
         })
         getGroupList(this.props.userInfo).then(res=> {
             this.setState({
@@ -41,8 +42,8 @@ class Mygroup extends Component{
     logoutGroup(item,e) {
          e.stopPropagation()
          let data = {
-            user_id : this.props.userInfo.id,
-            group_id : item.id
+            user_id : this.props.userInfo._id,
+            group_id : item.group_id._id
          }
          quitGroup(data).then(res => {
               if(res.code === 0) {
@@ -57,8 +58,8 @@ class Mygroup extends Component{
          })
     }
     handlerAgree(item) {
-        agreeRequest(item.id).then(data => {
-              console.log(data)
+        agreeRequest(item._id).then(data => {
+            
               getInvite(this.props.userInfo).then(res=> {
                 this.setState({
                     inviteList : res
@@ -84,7 +85,7 @@ class Mygroup extends Component{
                           {
                                inviteList.length ? 
                                inviteList.map((item,index) => {
-                               return <div style={{margin:'10px 0',paddingBottom:'10px',borderBottom:'1px solid #dddddd'}} key={item.id} >
+                               return <div style={{margin:'10px 0',paddingBottom:'10px',borderBottom:'1px solid #dddddd'}} key={item._id} >
                                    <span className='color-primary'>{item.inviter_name}</span> invites you join in the group: <span className='color-primary'>{item.group_name}</span>
                                <a className='btn btn-primary' style={{marginLeft:'10px'}} onClick={this.handlerAgree.bind(this,item)}>Agree</a></div>
                                })
@@ -97,12 +98,12 @@ class Mygroup extends Component{
                           <div className='recent-list mt20'>
                             {
                                 groupList.map((item,index) => {
-                                    return  <div className='recent-item' key={item.id} onClick={() => {
-                                        this.props.history.push(`/detail/${item.id}`) 
+                                    return  <div className='recent-item' key={item.group_id._id} onClick={() => {
+                                        this.props.history.push(`/detail/${item.group_id._id}`) 
                                     }}>
-                                            <img className='pic' alt=" " src={item.picture||''}></img>
+                                            <img className='pic' alt=" " src={item.group_id.picture||''}></img>
                                             <div className='right-box' style={{ textAlign : 'left'}}>
-                                                <h4>{item.name}</h4>
+                                                <h4>{item.group_id.name}</h4>
                                             </div>
                                             <a className='btn btn-info' style={{marginLeft:'10px'}} onClick={this.logoutGroup.bind(this,item)}>Leave</a>
                                     </div>

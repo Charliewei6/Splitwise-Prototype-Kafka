@@ -20,7 +20,7 @@ class Member extends Component {
         searchUser(e.target.value).then(data => {
           //     if(data && data.length) {
                    this.setState({
-                         findUsers: data.filter(item => item.id !== this.props.userInfo.id )
+                         findUsers: data.filter(item => item._id !== this.props.userInfo._id )
                    })
           //     }
         })
@@ -49,7 +49,7 @@ class Member extends Component {
                          <ul className={`dropdown-menu ${ findUsers.length ? 'open' : '' }`}>
                               {
                                    findUsers.map(item => {
-                                        return <li className='user-item' key={item.id} href="javascript:void(0)" onClick={this.choseUser.bind(this,item)}><span>{item.Name}</span><span style={{marginLeft:'20px'}}>{item.Email}</span></li>
+                                        return <li className='user-item' key={item._id} href="javascript:void(0)" onClick={this.choseUser.bind(this,item)}><span>{item.Name}</span><span style={{marginLeft:'20px'}}>{item.Email}</span></li>
                                    })
                               }
                               

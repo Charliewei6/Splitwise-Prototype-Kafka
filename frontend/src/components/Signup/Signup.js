@@ -2,8 +2,7 @@ import React, {Component} from 'react';
 import '../../App.css';
 import { signUP,login,getProfile } from '../../api/request.js';
 import cookie from 'react-cookies';
-import {Redirect} from 'react-router';
-import {Button,Form,Col,Card} from 'react-bootstrap';
+import {Form,Col,Card} from 'react-bootstrap';
 import { connect } from 'react-redux';
 import { SET_USER } from '../../store/actionTypes';
 //Define a Signup Component
@@ -80,14 +79,8 @@ class Signup extends Component{
         }))
     }
     render(){
-        //redirect based on successful login
-        // let redirectVar = null;
-        // if(cookie.load('cookie')){
-        //     redirectVar = <Redirect to= "/dashboard"/>
-        // }
         return(
             <div>
-                {/* {redirectVar} */}
                 <div align = "center">
                 <Card className="text-white">
                 <Card.Img src="https://i.picsum.photos/id/3/5616/3744.jpg?hmac=QSuBxtSpEv3Qm3iStn2b_Ikzj2EVD0jzn99m1n6JD9I" alt="Card image" />
