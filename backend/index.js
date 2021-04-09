@@ -13,6 +13,13 @@ var crypto = require('crypto');
 var fs = require('fs');
 var AWS = require('aws-sdk');
 
+const jwt = require('jsonwebtoken');
+const { secret } = require('./config');
+const { checkAuth } = require("./passport");
+const { auth } = require("./passport");
+auth();
+
+
 const { mongoDB } = require('./config');
 const mongoose = require('mongoose');
 const Users = require('./Models/UserModel')
@@ -21,6 +28,7 @@ const GroupPerson = require('./Models/GroupPersonModel')
 const Invite = require('./Models/InviteModel')
 const Expense = require('./Models/ExpenseModel')
 const ExpenseItem = require('./Models/ExpenseItemModel')
+const Comment = require('./Models/CommentModel')
 var options = {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -73,6 +81,8 @@ const imageUploader = multer({
 app.use(bodyParser.json());
 
 app.post('/login',(req, res) => {
+    console.log("enter login")
+
     var u = {
         email :req.body.email,
         password :req.body.password,
@@ -86,19 +96,30 @@ app.post('/login',(req, res) => {
             return;
         }
         if (user) {
-            res.cookie('cookie', "admin", { maxAge: 900000, httpOnly: false, path: '/' });
-            req.session.user = u;
+            // res.cookie('cookie', "admin", { maxAge: 900000, httpOnly: false, path: '/' });
+            // req.session.user = u;
+            // res.status(200).json({
+            //     id: user._id,
+            //     name: user.Name,
+            //     email: user.Email
+            // });
+            console.log("login success")
+            console.log(user._id)
+            const payload = { _id: user._id,email: user.Email};
+            const token = jwt.sign(payload, secret, {
+                expiresIn: 1008000
+            });
             res.status(200).json({
                 id: user._id,
-                name: user.Name,
-                email: user.Email
+                jwt: "JWT " + token
             });
-            console.log("login success")
+            // res.status(200).end("JWT " + token);
         }
         else {
-            res.status(401).json({
-                message: 'error'
-            });
+            // res.status(401).json({
+            //     message: 'error'
+            // });
+            res.status(401).end("Invalid Credentials");
         }
     });    
 });
@@ -141,7 +162,7 @@ app.post('/signup',function(req,res){
     });
    
 });
-app.get('/profile',function(req,res){
+app.get('/profile',checkAuth,function(req,res){
     var userId = req.query.user_id;
     Users.findOne({ _id: userId }, (err, user) => {
         if (err) {
@@ -155,12 +176,12 @@ app.get('/profile',function(req,res){
     });
 });
 
-app.post('/profile', function (req, res) {
+app.post('/profile', checkAuth,function (req, res) {
     id = req.body.user_id
     // var newvalues = {$set: {"Name": req.body.name,"Email": req.body.email,"Picture":req.body.picture,
     // "Phone":req.body.phone, "Currency":req.body.currency,"Language":req.body.language} };
     var newvalues = {$set: {Name: req.body.name,Email: req.body.email,Picture:req.body.picture,
-    Phone:req.body.phone, Currency:req.body.currency,Language:req.body.language} };
+    Phone:req.body.phone, Currency:req.body.currency,Timezone:req.body.timezone,Language:req.body.language} };
     Users.findByIdAndUpdate( id, newvalues ,(err, user) => {
         if (err) {
             console.log("error: ", err);
@@ -211,7 +232,7 @@ app.get('/upload', function (req, res) {
 });
 
 
-app.post('/group', function (req, res) {
+app.post('/group',checkAuth, function (req, res) {
     var userId = req.body.user_id;
     var userName = req.body.user_name;
     var name = req.body.name;
@@ -314,7 +335,7 @@ app.get('/search_person', function (req, res) {
 //     });
 // });
 
-app.get('/invite', function (req, res) {
+app.get('/invite', checkAuth,function (req, res) {
     var userId = req.query.user_id;
     Invite.find({invitee_id:userId},(err, result) => {
         if (err) {
@@ -327,7 +348,7 @@ app.get('/invite', function (req, res) {
         }
     });
 });
-app.post('/invite', function (req, res) {
+app.post('/invite',checkAuth, function (req, res) {
     var inviteId = req.body.invite_id;
     Invite.find({_id:inviteId},(err, result) => {
         if (err) {
@@ -363,7 +384,7 @@ app.post('/invite', function (req, res) {
         }
     });
 });
-app.get('/groups', function (req, res) {
+app.get('/groups', checkAuth,function (req, res) {
     var userId = req.query.user_id;
     if (req.query.name) {
         var name = req.query.name.split(" ").map(n => new RegExp(n));
@@ -429,7 +450,7 @@ app.post('/quit', function (req, res) {
     });
 });
 
-app.post('/add_expense', function (req, res) {
+app.post('/add_expense', checkAuth,function (req, res) {
     var userId = req.body.user_id;
     var userName = req.body.user_name;
     var groupId = req.body.group_id;
@@ -515,16 +536,17 @@ app.post('/add_expense', function (req, res) {
     });
 });
 
-app.get('/group_page', function (req, res) {
+app.get('/group_page',checkAuth, function (req, res) {
     var groupId = req.query.group_id;
     Promise.all([
-        Expense.find({group_id:groupId}).sort({ create_at: 'desc' }),
+        Expense.find({group_id:groupId}).sort({ create_at: 'desc' }).
+        populate([ {path: 'comment_list'},{path: 'comment_list',populate: {path: 'creator_id'}} ]),
         GroupPerson.find({ group_id:groupId }).
         populate({path: 'person_id'} )
     ]).then(result=>{
         
         const [expense,member] = result;
-        // console.log("1:",expense);
+        // console.log("expense:",expense);
         // console.log("2:",member);
         res.status(200).json({
             expenses: expense,
@@ -542,7 +564,7 @@ app.get('/group_page', function (req, res) {
 
 });
 
-app.get('/activity', function (req, res) {
+app.get('/activity',checkAuth, function (req, res) {
 
     var userId = req.query.user_id;
     var groupId = req.query.group_id;
@@ -552,6 +574,7 @@ app.get('/activity', function (req, res) {
         ExpenseItem.find({ $or: [{ owe_id: userId }, { owed_id: userId }],group_id:groupId}).
         populate('expense_id owe_id').
         exec(function (err, result) {
+            console.log(result)
             if (err) {
                 console.log(err)
                 res.status(401).json({
@@ -569,6 +592,7 @@ app.get('/activity', function (req, res) {
         ExpenseItem.find({ $or: [{ owe_id: userId }, { owed_id: userId }]}).
         populate('expense_id owe_id').
         exec(function (err, result) {
+            console.log(result)
             if (err) {
                 console.log(err)
                 res.status(401).json({
@@ -585,7 +609,7 @@ app.get('/activity', function (req, res) {
 
 });
 
-app.get('/dashboard',function(req,res){
+app.get('/dashboard',checkAuth,function(req,res){
     var userId = req.query.user_id;
      Promise.all([
         ExpenseItem.find({owe_id:userId,status:0}).sort({ _id: 'desc' }).
@@ -682,6 +706,70 @@ app.post('/settle_up',async function(req,res){
             })
 });
 
+app.post('/add_comment', function (req, res) {
+    var expenseId = req.body.expense_id
+    var userId = req.body.user_id
+    var note = req.body.note
+    var obj={creator_id:userId,notes:note}
+    Comment.create(obj,(err, result) => {
+        if (err) {
+            console.log(err)
+            res.status(401).json({
+                message: 'error'
+            });
+        } else {
+            // console.log(result)
+            Expense.findOne({_id:expenseId}, (error, info) => {
+                if (error) {
+                    res.status(401).json({
+                        message: 'error'
+                    });
+                }else{
+                    // console.log(result._id)
+                    var commentList = info.comment_list
+                    commentList.push(result._id)
+                    var newvalues = {$set: {comment_list: commentList} };
+                    Expense.findByIdAndUpdate( {_id:info._id}, newvalues ,(err, user) => {
+                        if (err) {
+                            console.log("error: ", err);
+                            res.status(401).json({
+                                message: 'error'
+                            });
+                        } else {
+                            res.status(200).json({
+                                message: 'success'
+                            });
+                        }
+                    });
+
+                }
+            }); 
+
+        }
+    });
+
+});
+
+
+app.post('/delete_comment', function (req, res) {
+    var noteId = req.body.noteId
+   
+    console.log("nodeId:",noteId)
+    Comment.findByIdAndDelete({_id:noteId},(err, delResult) => {
+        if (err) {
+            console.log(err)
+            res.status(401).json({
+                message: 'error'
+            });
+        } else {
+            res.status(200).json({
+                message: 'success'
+            });
+        }
+    });
+    
+
+});
 //start your server on port 3001
 app.listen(3001);
 module.exports = app;
