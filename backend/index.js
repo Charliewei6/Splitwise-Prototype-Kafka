@@ -81,8 +81,6 @@ const imageUploader = multer({
 app.use(bodyParser.json());
 
 app.post('/login',(req, res) => {
-    console.log("enter login")
-
     var u = {
         email :req.body.email,
         password :req.body.password,
@@ -103,8 +101,8 @@ app.post('/login',(req, res) => {
             //     name: user.Name,
             //     email: user.Email
             // });
-            console.log("login success")
-            console.log(user._id)
+            // console.log("login success")
+            // console.log(user._id)
             const payload = { _id: user._id,email: user.Email};
             const token = jwt.sign(payload, secret, {
                 expiresIn: 1008000
@@ -304,6 +302,7 @@ app.post('/group',checkAuth, function (req, res) {
 app.get('/search_person', function (req, res) {
     var email = req.query.email;
     email = email.split(" ").map(n => new RegExp(n));
+    console.log(email)
     Users.find({Email:{ $in: email }},(err, result) => {
         if (err) {
             console.log(err)
@@ -311,6 +310,7 @@ app.get('/search_person', function (req, res) {
                 message: 'error'
             });
         } else {
+            // console.log("here:",result)
             res.status(200).json(
                 result
             );
@@ -713,7 +713,7 @@ app.post('/add_comment', function (req, res) {
     var obj={creator_id:userId,notes:note}
     Comment.create(obj,(err, result) => {
         if (err) {
-            console.log(err)
+            // console.log(err)
             res.status(401).json({
                 message: 'error'
             });
@@ -753,9 +753,7 @@ app.post('/add_comment', function (req, res) {
 
 app.post('/delete_comment', function (req, res) {
     var noteId = req.body.noteId
-   
-    console.log("nodeId:",noteId)
-    Comment.findByIdAndDelete({_id:noteId},(err, delResult) => {
+       Comment.findByIdAndDelete({_id:noteId},(err, delResult) => {
         if (err) {
             console.log(err)
             res.status(401).json({
