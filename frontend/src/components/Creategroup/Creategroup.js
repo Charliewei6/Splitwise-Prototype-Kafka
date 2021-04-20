@@ -1,6 +1,8 @@
 import React, {Component} from 'react';
 import '../../App.css';
 import cookie from 'react-cookies';
+import axios from 'axios';
+
 import LogoPng from './createGroup.svg';
 import './createGroup.scss';
 import Member from './Member';
@@ -40,6 +42,10 @@ class Creategroup extends Component{
          this.handleChange = this.handleChange.bind(this)
     }
     componentDidMount() {
+
+     if(!localStorage.getItem('token')){
+          this.props.history.push('/')
+     }
         let { detailId } = this.state
          if(detailId) {
 
@@ -61,9 +67,9 @@ class Creategroup extends Component{
                    })
               })
          }
-         if(!cookie.load('cookie')){
-          this.props.history.push('/')
-         }
+     //     if(!cookie.load('cookie')){
+     //      this.props.history.push('/')
+     //     }
     }
     handleChange(e) {
          this.setState({
@@ -113,6 +119,7 @@ class Creategroup extends Component{
         if(detailId) {
              data.group_id = detailId
         }
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
         createGroup(data).then(res => {
              alert('Save succeed')
         })

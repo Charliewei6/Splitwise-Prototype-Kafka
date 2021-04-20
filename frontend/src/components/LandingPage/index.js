@@ -9,7 +9,7 @@ export default function Index(props) {
      return (
         <div>
             {
-                cookie.load('cookie')?<Redirect to= "/dashboard"/>:null
+                // cookie.load('cookie')?<Redirect to= "/dashboard"/>:null
             }
             <Navbar histroy={props.history}></Navbar>
             <Jumbotron style={{ height : 'calc(100vh - 64px)', marginBottom:0}}>
@@ -18,6 +18,7 @@ export default function Index(props) {
                 <p>
                     {/* <a className="btn btn-info btn-lg" href="/signup" role="button">Sign Up</a> */}
                     <Link className="btn btn-info btn-lg" to='/signup'>Sign Up</Link>
+                    
                 </p>
             </Jumbotron>
         </div>

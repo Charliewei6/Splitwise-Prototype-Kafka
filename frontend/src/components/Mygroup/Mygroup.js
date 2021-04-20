@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import '../../App.css';
 import cookie from 'react-cookies';
+import axios from 'axios';
 import {Container,Col,Row,Form} from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Navbar from '../Navbar/Navbar';
@@ -24,6 +25,10 @@ class Mygroup extends Component{
         })
     }
     componentDidMount() {
+        if(!localStorage.getItem('token')){
+            this.props.history.push('/')
+        }
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
         getInvite(this.props.userInfo).then(res=> {
              this.setState({
                  inviteList : res
@@ -35,9 +40,9 @@ class Mygroup extends Component{
                 groupList : res
             })
         })
-        if(!cookie.load('cookie')){
-            this.props.history.push('/')
-           }
+        // if(!cookie.load('cookie')){
+        //     this.props.history.push('/')
+        //    }
     }
     logoutGroup(item,e) {
          e.stopPropagation()

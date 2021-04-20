@@ -10,6 +10,7 @@ import { connect } from 'react-redux'
 import moment from 'moment-timezone';
 import Accordion from 'react-bootstrap/Accordion';
 import {Button,Card} from 'react-bootstrap';
+import axios from 'axios';
 
 class Group extends Component{
     constructor(props) {
@@ -25,6 +26,10 @@ class Group extends Component{
         this.commentHandler  = this.commentHandler .bind(this);
     }
     componentDidMount() {
+        if(!localStorage.getItem('token')){
+            this.props.history.push('/')
+        }
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
         getGroupList(this.props.userInfo).then(res => {
             // alert(res[0].group_id._id)
              this.setState({
@@ -41,9 +46,9 @@ class Group extends Component{
              }
              
         })
-        if(!cookie.load('cookie')){
-            this.props.history.push('/')
-           }
+        // if(!cookie.load('cookie')){
+        //     this.props.history.push('/')
+        //    }
         
     }
     changeGroup(item) {
@@ -211,7 +216,7 @@ class Group extends Component{
                           <h3 className='mt20'>GROUP BALANCES</h3>
                           {
                                members.length ? members.map(item => {
-                               return <div key={item.person_id._id}>{item.person_id.Name}<span style={{marginLeft:'20px'}}>{this.props.userInfo.currencyStr} {item.balance}</span></div>
+                               return <div key={item.person_id._id}>{item.person_id.Name}<span style={{marginLeft:'20px'}}>{this.props.userInfo.currencyStr} {Math.round(item.balance * 100) / 100 }</span></div>
                                }):<div>no any balances</div>
                           }
                       </Col>

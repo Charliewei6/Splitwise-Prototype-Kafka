@@ -48,10 +48,10 @@ const createGroup = (data) => {
     return axios.post(`${domain}/group`,data).then(res => res.data)
 }
 const getInvite = (userInfo) => {
-    return axios.get(`${domain}/invite?user_id=${userInfo.id}`).then(res => res.data)
+    return axios.get(`${domain}/invite?user_id=${userInfo._id}`).then(res => res.data)
 }
 const getGroupList = (userInfo,name='') => {
-    return axios.get(`${domain}/groups?user_id=${userInfo.id}&name=${name}`).then(res => res.data)
+    return axios.get(`${domain}/groups?user_id=${userInfo._id}&name=${name}`).then(res => res.data)
 }
 
 const getGroupDetail = (groupId) => {
@@ -59,10 +59,16 @@ const getGroupDetail = (groupId) => {
 }
 const getRecent =(userInfo,group_id='',order=0) => {
      order = order ? 1 : 0;
-     return axios.get(`${domain}/activity?user_id=${userInfo.id}&group_id=${group_id}&order=${order}`).then(res => res.data)
+     return axios.get(`${domain}/activity?user_id=${userInfo._id}&group_id=${group_id}&order=${order}`).then(res => res.data)
 }
 const addExpense =(data) => {
      return axios.post(`${domain}/add_expense`,data).then(res => res)
+}
+const addComment =(data) => {
+    return axios.post(`${domain}/add_comment`,data).then(res => res)
+}
+const deleteComment =(data) => {
+    return axios.post(`${domain}/delete_comment`,data).then(res => res)
 }
 const getGroupContent = (groupId) => {
     return axios.get(`${domain}/group_page?group_id=${groupId}`).then(res => res.data)
@@ -92,5 +98,7 @@ export {
      getGroupContent,
      addExpense,
      quitGroup,
-     agreeRequest
+     agreeRequest,
+     addComment,
+     deleteComment
 }

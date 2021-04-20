@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import '../../App.css';
+import axios from 'axios';
 import cookie from 'react-cookies';
 import Navbar from '../Navbar/Navbar';
 import {Container,Form} from 'react-bootstrap';
@@ -113,12 +114,17 @@ class Profile extends Component{
     }
 //get the books data from backend  
     componentDidMount(){
-        if(!cookie.load('cookie')){
+        // if(!cookie.load('cookie')){
+        //     this.props.history.push('/')
+        //    }
+        if(!localStorage.getItem('token')){
             this.props.history.push('/')
-           }
+        }
 
         let { _id } = this.props.userInfo
         if(!_id) return;
+
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
         getProfile(this.props.userInfo._id).then(data => {
             this.props.setUser(data)
             let { Name,Email,Phone,Currency,Language,Timezone,Picture } = this.props.userInfo
@@ -239,6 +245,7 @@ class Profile extends Component{
     }
     saveProfile() {
          let { name,email,phoneNumber,currency,language,timeZone,avatarUrl } = this.state
+         axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
          changeUserInfo({
             userId:this.props.userInfo._id,name,email,phoneNumber,currency,language,timeZone,avatarUrl
          }).then(() => {
@@ -247,6 +254,7 @@ class Profile extends Component{
                 editingEmail : false,
                 editingPhone : false
               })
+              axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
               getProfile(this.props.userInfo._id).then(data => {
                   localStorage.setItem('userInfo',JSON.stringify(data))
                   this.props.setUser(data)

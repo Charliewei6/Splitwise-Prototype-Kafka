@@ -1,21 +1,27 @@
 import React, {Component} from 'react';
 import '../../App.css';
 import cookie from 'react-cookies';
+import axios from 'axios';
 import Navbar from '../Navbar/Navbar';
 import {Container,Col,Row} from 'react-bootstrap';
 import { connect } from 'react-redux';
-import { getDashboard,settleUp,settleUpp } from '../../api/request';
+import { getDashboard,settleUp} from '../../api/request';
 import { SET_DASHBOARD } from '../../store/actionTypes'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Dashboard.scss';
 class Dashboard extends Component{
     componentDidMount() {
+      if(!localStorage.getItem('token')){
+        this.props.history.push('/')
+    }
+      axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+
       getDashboard(this.props.userInfo._id).then(data => {
           this.props.setDashBoard(data)
       })
-      if(!cookie.load('cookie')){
-        this.props.history.push('/')
-       }
+      // if(!cookie.load('cookie')){
+      //   this.props.history.push('/')
+      //  }
     }
     settleUpHandler() {
       settleUp(this.props.userInfo._id).then(res => {
@@ -58,7 +64,7 @@ class Dashboard extends Component{
                               {
                                   dashData.owe.map((item,index) => {
                                      return <div className='recent-item' key={index} style={{justifyContent:'flex-start',color:'#ff652f',cursor:'default'}}>
-                                       you owe  {item.owed_id.Name} {userInfo.currencyStr}{item.money} in group "{item.expense_id.group_name}"
+                                       you owe  {item.owed_id.Name} {userInfo.currencyStr}{ Math.round(item.money * 100) / 100 } in group "{item.expense_id.group_name}"
                                   </div>
                                   })
                                }
@@ -76,7 +82,7 @@ class Dashboard extends Component{
                                {
                                   dashData.owed.map((item,index) => {
                                      return <div className='recent-item' key={index} style={{justifyContent:'flex-end',color:'#5bc5a7',cursor:'default'}}>
-                                         {item.owe_id.Name}  owes you  {userInfo.currencyStr}{item.money}  in group "{item.expense_id.group_name}"
+                                         {item.owe_id.Name}  owes you  {userInfo.currencyStr}{ Math.round(item.money * 100) / 100 }  in group "{item.expense_id.group_name}"
                                       </div>
                                   })
                                }

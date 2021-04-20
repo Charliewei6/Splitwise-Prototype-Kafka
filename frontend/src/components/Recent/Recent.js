@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import '../../App.css';
+import axios from 'axios';
 import cookie from 'react-cookies';
 import Navbar from '../Navbar/Navbar';
 import {Container} from 'react-bootstrap';
@@ -28,9 +29,13 @@ class Recent extends Component{
          this.paginate= this.paginate.bind(this);
     }
     componentDidMount() {
-        if(!cookie.load('cookie')){
+        if(!localStorage.getItem('token')){
             this.props.history.push('/')
-           }
+        }
+        // if(!cookie.load('cookie')){
+        //     this.props.history.push('/')
+        //    }
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
         getRecent(this.props.userInfo,this.state.searchName,this.state.timeSort).then(data => {
             this.setState({
                totalPost : data.length
@@ -122,12 +127,12 @@ class Recent extends Component{
                                 <div>{
                                     item.owed_id===_id ? <div>
                                             <div>You added "<span className='color-primary'>{item.expense_id.name}</span>" in group  "<span className='color-primary'>{item.expense_id.group_name}</span>".</div>
-                                            <div style={{color:'#5bc5a7'}}> {item.owe_id.Name} owes you {currencyStr}{item.money}</div>
+                                            <div style={{color:'#5bc5a7'}}> {item.owe_id.Name} owes you {currencyStr}{ Math.round(item.money * 100) / 100 }</div>
                                             <div title={moment(item.create_at).format('YYYY-MM-DD')}>{moment(item.create_at).tz(Timezone).format('YYYY-MM-DD ha z')}</div>
                                         </div>:
                                         <div>
                                             <div>{item.expense_id.creator_name} added "<span className='color-primary'>{item.expense_id.name}</span>" in group  "<span className='color-primary'>{item.expense_id.group_name}</span>".</div>
-                                            <div style={{color:'#ff652f'}}>You owe {currencyStr}{item.money}</div>
+                                            <div style={{color:'#ff652f'}}>You owe {currencyStr}{ Math.round(item.money * 100) / 100 }</div>
                                             <div title={moment(item.create_at).format('YYYY-MM-DD')}>{moment(item.create_at).tz(Timezone).format('YYYY-MM-DD ha z')}</div>
                                         </div>
                                    

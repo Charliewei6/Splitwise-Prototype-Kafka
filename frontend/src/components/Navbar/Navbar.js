@@ -7,12 +7,13 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 //create the Navbar Component
 class Navbar extends Component {
     handleLogout = () => {
-        cookie.remove('cookie', { path: '/' })
-        localStorage.removeItem('userInfo')
+        // cookie.remove('cookie', { path: '/' })
+        // localStorage.removeItem('userInfo')
+        localStorage.clear();
         this.props.history.push('/');
     }
     render(){
-        if(cookie.load('cookie')){
+        if(localStorage.getItem('token')){
             return(
                 <div>   
                 <nav className="navbar navbar-expand-lg navbar-dark bg-dark">

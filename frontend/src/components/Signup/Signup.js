@@ -5,6 +5,9 @@ import cookie from 'react-cookies';
 import {Form,Col,Card} from 'react-bootstrap';
 import { connect } from 'react-redux';
 import { SET_USER } from '../../store/actionTypes';
+import jwt_decode from "jwt-decode"
+import { Redirect } from 'react-router';
+
 //Define a Signup Component
 class Signup extends Component{
     
@@ -14,7 +17,8 @@ class Signup extends Component{
             name : "",
             email : "",
             password : "",
-            err: ""
+            err: "",
+            token: ""
         }
         // Bind the handlers to this class
         this.nameHandler = this.nameHandler.bind(this);
@@ -66,20 +70,34 @@ class Signup extends Component{
             email:this.state.email,
             password : this.state.password
         }).then(res => {
-            cookie.save('cookie', res.id);
+            // cookie.save('cookie', res.id);
+            this.setState({
+                token: res.jwt
+            });
             getProfile(res.id).then(data => {
                 data.Timezone = data.Timezone || 'Africa/Abidjan'
                 data.Currency = data.Currency || 0
                 localStorage.setItem('userInfo',JSON.stringify(data))
                 this.props.setUser(data)
-                this.props.history.push('/dashboard')
+                // this.props.history.push('/dashboard')
             })
         }).catch((error) => this.setState({
             err: "Username or password invalid!"
         }))
     }
     render(){
+        let redirectVar = null;
+        if (this.state.token.length > 0) {
+            localStorage.setItem("token", this.state.token);
+            var decoded = jwt_decode(this.state.token.split(' ')[1]);
+            // alert(decoded)
+            localStorage.setItem("user_id", decoded._id);
+            localStorage.setItem("email", decoded.email);
+            redirectVar = <Redirect to="/dashboard" />
+        }
         return(
+            <div>                
+                {redirectVar}
             <div>
                 <div align = "center">
                 <Card className="text-white">
@@ -105,7 +123,7 @@ class Signup extends Component{
                             <Form.Control data-testid='Signup-password' onChange = {this.passwordHandler}  type="password" name = "password" placeholder="Password" required/>
                             </Form.Group>
                         </Col>
-                        <button class="btn btn-primary" type="submit">Submit</button>
+                        <button className="btn btn-primary" type="submit">Submit</button>
                         {/* <Button onClick = {this.submitSignup}  variant="primary" type="submit">Submit</Button> */}
 
                 </Form>
@@ -117,6 +135,7 @@ class Signup extends Component{
                 
             </div>
 
+            </div>
             </div>
         )
     }
