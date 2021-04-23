@@ -107,7 +107,7 @@ async function handle_request(msg, callback) {
 			console.log("Inside Profile Post Request");
 			console.log("Req Body : ", msg);
 			let message = msg.data;
-			id = message.user_id
+			let id = message.user_id
 			var newvalues = {$set: {Name: message.name,Email: message.email,Picture:message.picture,
 			Phone: message.phone, Currency: message.currency,Timezone: message.timezone,Language:message.language} };
 			try {
